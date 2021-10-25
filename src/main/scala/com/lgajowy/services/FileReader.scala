@@ -2,7 +2,7 @@ package com.lgajowy.services
 
 import cats.effect.IO
 import com.lgajowy.domain.errors.{ FileNotFoundError, NotADirectory }
-import com.lgajowy.domain.{ Directory, DirectoryPath, FilePath, TextLines }
+import com.lgajowy.domain.{ Directory, DirectoryPath, FilePath, FileContents }
 
 import java.io.File
 import java.nio.file.Files
@@ -11,7 +11,7 @@ import scala.jdk.CollectionConverters.IteratorHasAsScala
 import scala.util.Using
 
 trait FileReader[F[_]] {
-  def readFile(file: File): F[TextLines]
+  def readFile(file: File): F[FileContents]
 
   def readDirectory(directory: DirectoryPath): F[Directory]
 
@@ -46,9 +46,9 @@ object FileReader {
     }
 
     // TODO: implement using cats Resource!!!
-    override def readFile(file: File): IO[TextLines] = IO.delay {
+    override def readFile(file: File): IO[FileContents] = IO.delay {
       Using.resource(Source.fromFile(file, "UTF-8"))(source => {
-        TextLines(filePath = FilePath(file.getAbsolutePath), lines = source.getLines().toSeq)
+        FileContents(filePath = FilePath(file.getAbsolutePath), lines = source.getLines().toSeq)
       })
     }
   }

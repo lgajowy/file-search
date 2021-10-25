@@ -1,7 +1,11 @@
 package com.lgajowy
 
+import cats.Traverse
+
 import cats.effect.{ ExitCode, IO, IOApp }
-import com.lgajowy.services.{ ArgParser, FileReader }
+import com.lgajowy.services.{ ArgParser, FileReader, IndexBuilder, PerFileIndex }
+
+import java.io.File
 
 object Main extends IOApp {
 
@@ -9,15 +13,18 @@ object Main extends IOApp {
 
     val fileReader = FileReader.makeIO()
     val argParser = ArgParser.makeIO()
+    val indexBuilder = IndexBuilder.makeIO()
 
     for {
       directoryPath <- argParser.parseDirectoryPath(args)
       directory <- fileReader.readDirectory(directoryPath)
       filesToSearch <- fileReader.findAllFilesRecursively(directory)
-      fileContents = filesToSearch
-        .map(file => {
-          fileReader.readFile(file)
-        })
+      index: IO[List[PerFileIndex]] = Traverse[List].traverse(filesToSearch)((file: File) => {
+        for {
+          contents <- fileReader.readFile(file)
+          perFileIndex <- indexBuilder.buildIndexForFileContents(contents)
+        } yield perFileIndex
+      })
 
       _ <- IO.println(filesToSearch)
     } yield ExitCode.Success
