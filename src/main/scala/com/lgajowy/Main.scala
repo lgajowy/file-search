@@ -13,7 +13,8 @@ object Main extends IOApp {
     for {
       directoryPath <- argParser.parseDirectoryPath(args)
       directory <- fileReader.readDirectory(directoryPath)
-      _ <- IO.println(directory)
+      filesToSearch <- fileReader.findAllFilesRecursively(directory)
+      _ <- IO.println(filesToSearch.map(_.getPath))
     } yield ExitCode.Success
   }
 }

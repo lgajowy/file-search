@@ -5,6 +5,5 @@ import scala.util.control.NoStackTrace
 object errors {
   case class FileNotFoundError(message: String) extends NoStackTrace
   case class NotADirectory(message: String) extends NoStackTrace
-
   case class MissingDirectoryPathArgument(message: String) extends NoStackTrace
 }
