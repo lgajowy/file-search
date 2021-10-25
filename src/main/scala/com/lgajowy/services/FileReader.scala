@@ -1,14 +1,18 @@
 package com.lgajowy.services
 
 import cats.effect.IO
-import com.lgajowy.domain.errors.{FileNotFoundError, NotADirectory}
-import com.lgajowy.domain.{Directory, DirectoryPath}
+import com.lgajowy.domain.errors.{ FileNotFoundError, NotADirectory }
+import com.lgajowy.domain.{ Directory, DirectoryPath, FilePath, TextLines }
 
 import java.io.File
 import java.nio.file.Files
+import scala.io.Source
 import scala.jdk.CollectionConverters.IteratorHasAsScala
+import scala.util.Using
 
 trait FileReader[F[_]] {
+  def readFile(file: File): F[TextLines]
+
   def readDirectory(directory: DirectoryPath): F[Directory]
 
   def findAllFilesRecursively(directory: Directory): F[List[File]]
@@ -39,6 +43,13 @@ object FileReader {
           .map(_.toFile)
           .toList
       }
+    }
+
+    // TODO: implement using cats Resource!!!
+    override def readFile(file: File): IO[TextLines] = IO.delay {
+      Using.resource(Source.fromFile(file, "UTF-8"))(source => {
+        TextLines(filePath = FilePath(file.getAbsolutePath), lines = source.getLines().toSeq)
+      })
     }
   }
 }
