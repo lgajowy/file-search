@@ -1,16 +1,21 @@
 package com.lgajowy
 
-import cats.effect._
+import cats.effect.{ExitCode, IO, IOApp}
+import com.lgajowy.domain.DirectoryPath
+import com.lgajowy.services.FileReader
 
 object Main extends IOApp {
 
-  private case class DirectoryPath(path: String)
+  override def run(args: List[String]): IO[ExitCode] = {
 
-  override def run(args: List[String]): IO[ExitCode] =
+    val fileReader = FileReader.makeIO()
+
     for {
       _ <- if (args.length < 1) IO.raiseError(new IllegalArgumentException("Please enter the directory path"))
       else IO.unit
       path = DirectoryPath(args.head)
-      _ <- IO.println(path)
+      directory <- fileReader.readDirectory(path)
+      _ <- IO.println(directory)
     } yield ExitCode.Success
+  }
 }
