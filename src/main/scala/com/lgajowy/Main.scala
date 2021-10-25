@@ -1,9 +1,9 @@
 package com.lgajowy
 
 import cats.Traverse
-import cats.effect.{ ExitCode, IO, IOApp }
-import com.lgajowy.domain.{ Phrase, Result }
-import com.lgajowy.services.{ ArgParser, FileReader, IndexBuilder, PerFileIndex, SearchTool }
+import cats.effect.{ExitCode, IO, IOApp}
+import com.lgajowy.domain.{PerFileIndex, Phrase, Result}
+import com.lgajowy.services.{ArgParser, FileReader, IndexBuilder, SearchTool}
 
 import java.io.File
 

@@ -1,7 +1,7 @@
 package com.lgajowy.services
 
 import cats.effect.IO
-import com.lgajowy.domain.FileContents
+import com.lgajowy.domain.{FileContents, PerFileIndex}
 
 trait IndexBuilder[F[_]] {
   def buildIndexForFileContents(lines: FileContents): F[PerFileIndex]

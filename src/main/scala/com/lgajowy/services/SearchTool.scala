@@ -1,16 +1,14 @@
 package com.lgajowy.services
 
 import cats.effect.IO
-import com.lgajowy.domain.{ Phrase, RankingValue, Result }
+import com.lgajowy.domain.{PerFileIndex, Phrase, RankingValue, Result}
 
 trait SearchTool[F[_]] {
-
   def search(phrase: Phrase, index: PerFileIndex): F[Result]
-
 }
 
 
-// again - should i wrap it in F (IO in this case)???
+// TODO: again - should i wrap it in F (IO in this case)???
 object SearchTool {
   def makeIO(): SearchTool[IO] = new SearchTool[IO] {
     override def search(phrase: Phrase, index: PerFileIndex): IO[Result] = IO.delay {

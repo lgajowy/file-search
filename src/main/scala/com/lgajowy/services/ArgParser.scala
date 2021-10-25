@@ -9,10 +9,10 @@ trait ArgParser[F[_]] {
 }
 
 object ArgParser {
-  def makeIO() = new ArgParser[IO] {
+  def makeIO(): ArgParser[IO] = new ArgParser[IO] {
     override def parseDirectoryPath(args: List[String]): IO[DirectoryPath] =
       if (args.length < 1) {
-        IO.raiseError(new MissingDirectoryPathArgument("Please enter the directory path as a command line argument"))
+        IO.raiseError(MissingDirectoryPathArgument("Please enter the directory path as a command line argument"))
       } else {
         IO(DirectoryPath(args.head))
       }
