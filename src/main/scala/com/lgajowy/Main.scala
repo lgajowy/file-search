@@ -6,17 +6,26 @@ import com.lgajowy.domain.{ Phrase, Result }
 import com.lgajowy.services.{ ArgParser, FileReader, IndexBuilder, PerFileIndex, SearchTool }
 
 import java.io.File
-import scala.io.StdIn.readLine
 
 object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
-
     val fileReader = FileReader.makeIO()
     val argParser = ArgParser.makeIO()
     val indexBuilder = IndexBuilder.makeIO()
     val searchTool = SearchTool.makeIO()
 
+    Program(fileReader, argParser, indexBuilder, searchTool).run(args)
+  }
+}
+
+case class Program(
+  fileReader: FileReader[IO],
+  argParser: ArgParser[IO],
+  indexBuilder: IndexBuilder[IO],
+  searchTool: SearchTool[IO]
+) {
+  def run(args: List[String]): IO[ExitCode] = {
     for {
       directoryPath <- argParser.parseDirectoryPath(args)
       directory <- fileReader.readDirectory(directoryPath)
@@ -27,19 +36,18 @@ object Main extends IOApp {
           perFileIndex <- indexBuilder.buildIndexForFileContents(contents)
         } yield perFileIndex
       })
-      _ <- indexes.flatMap(searchLoopStep(searchTool, _)).foreverM
+      _ <- indexes.flatMap(searchLoopStep).foreverM
     } yield ExitCode.Success
   }
 
-  def searchLoopStep(searchTool: SearchTool[IO], indexes: List[PerFileIndex]): IO[Unit] = {
-    val topResultsToList = 10
-
-    println(s"search> ")
-    val phrase = Phrase(readLine())
-    Traverse[List]
-      .traverse(indexes)(searchTool.search(phrase, _))
-      .map(allResults => { allResults.sortBy(_.score.value).take(topResultsToList) })
-      .flatMap(results => IO.println(toPrettyOutput(results)))
+  def searchLoopStep(indexes: List[PerFileIndex]): IO[Unit] = {
+    for {
+      _ <- IO.println(s"search> ")
+      phrase <- IO.readLine.map(Phrase(_))
+      searchResults <- Traverse[List].traverse(indexes)(searchTool.search(phrase, _))
+      top10Results = searchResults.sortBy(_.score.value).take(10)
+      _ <- IO.println(toPrettyOutput(top10Results))
+    } yield ()
   }
 
   private def toPrettyOutput(results: List[Result]): String =
