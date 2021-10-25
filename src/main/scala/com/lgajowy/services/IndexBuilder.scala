@@ -7,6 +7,7 @@ trait IndexBuilder[F[_]] {
   def buildIndexForFileContents(lines: FileContents): F[PerFileIndex]
 }
 
+// TODO: Should it be IO? The code does not even have any side effects
 object IndexBuilder {
   def makeIO(): IndexBuilder[IO] = new IndexBuilder[IO] {
     override def buildIndexForFileContents(contents: FileContents): IO[PerFileIndex] = {
