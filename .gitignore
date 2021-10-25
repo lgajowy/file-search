@@ -1,0 +1,23 @@
+### SBT ###
+dist/*
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.history
+.cache
+.lib/
+
+### Scala ###
+*.class
+*.log
+hs_err_pid*
+
+
+### Other ###
+.bsp/
+.idea/
+out/
+target/
+project/project/target/
+project/target/
