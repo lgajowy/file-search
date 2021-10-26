@@ -1,17 +1,16 @@
 package com.lgajowy.services
 
-import cats.effect.IO
-import com.lgajowy.domain.{FileContents, PerFileIndex}
+import cats.Applicative
+import com.lgajowy.domain.{ FileContents, PerFileIndex }
 
 trait IndexBuilder[F[_]] {
   def buildIndexForFileContents(lines: FileContents): F[PerFileIndex]
 }
 
-// TODO: Should it be IO? The code does not even have any side effects
 object IndexBuilder {
-  def makeIO(): IndexBuilder[IO] = new IndexBuilder[IO] {
-    override def buildIndexForFileContents(contents: FileContents): IO[PerFileIndex] = {
-      IO.delay {
+  def make[F[_]: Applicative](): IndexBuilder[F] = new IndexBuilder[F] {
+    override def buildIndexForFileContents(contents: FileContents): F[PerFileIndex] = {
+      Applicative[F].pure {
         val lines = contents.lines
         val wordSet = lines
           .flatMap(

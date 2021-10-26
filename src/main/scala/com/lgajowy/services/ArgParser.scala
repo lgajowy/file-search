@@ -1,6 +1,6 @@
 package com.lgajowy.services
 
-import cats.effect.IO
+import cats.{ Applicative, ApplicativeThrow }
 import com.lgajowy.domain.DirectoryPath
 import com.lgajowy.domain.errors.MissingDirectoryPathArgument
 
@@ -9,12 +9,14 @@ trait ArgParser[F[_]] {
 }
 
 object ArgParser {
-  def makeIO(): ArgParser[IO] = new ArgParser[IO] {
-    override def parseDirectoryPath(args: List[String]): IO[DirectoryPath] =
+  def make[F[_]: ApplicativeThrow](): ArgParser[F] = new ArgParser[F] {
+    override def parseDirectoryPath(args: List[String]): F[DirectoryPath] =
       if (args.length < 1) {
-        IO.raiseError(MissingDirectoryPathArgument("Please enter the directory path as a command line argument"))
+        ApplicativeThrow[F]
+          .raiseError(MissingDirectoryPathArgument("Please enter the directory path as a command line argument"))
       } else {
-        IO(DirectoryPath(args.head))
+        // TODO: can I use "pure" here? It seems to have no side effects but what if I'm missing something?
+        Applicative[F].pure(DirectoryPath(args.head))
       }
   }
 }

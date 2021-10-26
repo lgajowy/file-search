@@ -1,19 +1,19 @@
 package com.lgajowy
 
 import cats.Traverse
-import cats.effect.{ExitCode, IO, IOApp}
-import com.lgajowy.domain.{PerFileIndex, Phrase, Result}
-import com.lgajowy.services.{ArgParser, FileReader, IndexBuilder, SearchTool}
+import cats.effect.{ ExitCode, IO, IOApp }
+import com.lgajowy.domain.{ PerFileIndex, Phrase, Result }
+import com.lgajowy.services.{ ArgParser, FileReader, IndexBuilder, SearchTool }
 
 import java.io.File
 
 object Main extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
-    val fileReader = FileReader.makeIO()
-    val argParser = ArgParser.makeIO()
-    val indexBuilder = IndexBuilder.makeIO()
-    val searchTool = SearchTool.makeIO()
+    val fileReader = FileReader.make[IO]()
+    val argParser = ArgParser.make[IO]()
+    val indexBuilder = IndexBuilder.make[IO]()
+    val searchTool = SearchTool.make[IO]()
 
     Program(fileReader, argParser, indexBuilder, searchTool).run(args)
   }
